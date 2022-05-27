@@ -18,7 +18,7 @@ const defaultPeriod: Pick<Answer, "start_time" | "end_time"> = {
   end_time: "21:00",
 };
 
-class CreateReportService extends ServiceContract<string> {
+class CreateReportService extends ServiceContract {
   static getInstance(): CreateReportService {
     return new CreateReportService();
   }
@@ -67,7 +67,9 @@ class CreateReportService extends ServiceContract<string> {
 
     const currentPath = await this.shellCommander.pwd();
 
-    await this.shellCommander.touch(`${currentPath}/report.md`);
+    const reportPath = `${currentPath}/report.md`;
+
+    await this.shellCommander.touch(reportPath);
 
     const reportBody = intervalDates.map((currentInterval) =>
       createDayReportTemplate({
@@ -82,11 +84,13 @@ class CreateReportService extends ServiceContract<string> {
     const report = `
     ${createReportTitleTemplate(startDate)}
     ${reportBody.join("")}
-    
-    
     `;
 
     await this.shellCommander.exec(`echo "${report}" >> report.md`);
+
+    await this.shellCommander.echo("Relatório gerado com sucesso!");
+
+    await this.shellCommander.echo(`Relatório salvo em ${reportPath}`);
   }
 }
 

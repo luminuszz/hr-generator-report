@@ -1,14 +1,26 @@
 {
   "name": "hr-generator-report",
-  "version": "1.0.0",
+  "version": "1.0.5",
   "main": "src/index.ts",
   "author": "luminuszz",
   "license": "MIT",
   "scripts": {
-    "dev": "yarn tsc && node out/index.js"
+    "dev": "yarn tsc && node out/index.js",
+    "build": "yarn babel src --extensions \".js,.ts\" --out-dir dist --copy-files",
+    "push": "yarn publish",
+    "prepush": "yarn build"
+
+
+  },
+  "bin": {
+    "hr": "dist/index.js"
   },
   "devDependencies": {
-    "@babel/preset-env": "^7.14.5",
+    "@babel/cli": "^7.17.10",
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-flow": "^7.17.12",
+    "@babel/preset-typescript": "^7.17.12",
     "@types/commander": "^2.12.2",
     "@types/inquirer": "^8.2.1",
     "@types/node": "^17.0.35",

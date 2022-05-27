@@ -1,7 +1,7 @@
 import inquirer from "inquirer";
 import shellJs from "shelljs";
 
-export default abstract class Service {
+export default abstract class ServiceContract {
   protected readonly shellCommander: typeof shellJs;
 
   protected readonly shellInputs: typeof inquirer;
