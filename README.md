@@ -34,9 +34,6 @@
  $ hr generate
 ```
 
-```sh
- $ hr init --month
-```
 
 ![img.png](images/img3.png)
 
