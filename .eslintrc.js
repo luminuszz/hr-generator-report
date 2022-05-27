@@ -19,5 +19,8 @@ module.exports = {
         alphabetize: { order: "asc", ignoreCase: true },
       },
     ],
+    "import/no-unresolved": "off",
+    "no-nested-ternary": "off",
+    "import/extensions": "off",
   },
 };
