@@ -33,13 +33,13 @@ export default class CreateOneReportService extends ServiceContract {
         type: "input",
         name: "start_time",
         message: "Selecione o horário inicial (hh:mm):",
-        default: () => format(today, "hh:mm"),
+        default: () => format(today, "HH:mm"),
       },
       {
         type: "input",
         name: "end_time",
         message: "Selecione o horário final (hh:mm):",
-        default: () => format(addMinutes(today, 30), "hh:mm"),
+        default: () => format(addMinutes(today, 30), "HH:mm"),
       },
       {
         type: "input",
@@ -87,6 +87,16 @@ export default class CreateOneReportService extends ServiceContract {
     
     `;
 
+    const currentPath = await this.shellCommander.pwd();
+
+    const reportsPath = `${currentPath}/report.md`;
+
+    await this.shellCommander.touch(reportsPath);
+
     await this.shellCommander.exec(`echo "${report}" >> report.md`);
+
+    await this.shellCommander.echo("Relatório gerado com sucesso!");
+
+    await this.shellCommander.echo(`Relatório salvo em ${reportsPath}`);
   }
 }

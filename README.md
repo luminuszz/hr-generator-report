@@ -15,6 +15,9 @@
 
 ## Use
 
+
+### Generate template report week (7 days)
+
 ```sh
  $ hr init
 ```
@@ -23,3 +26,20 @@
 ####
 
 ![img.png](images/img2.png)
+
+
+### Generate one template report (1 day)
+
+```sh
+ $ hr generate
+```
+
+```sh
+ $ hr init --month
+```
+
+![img.png](images/img3.png)
+
+
+
+![img.png](images/img4.png)
