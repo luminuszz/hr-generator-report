@@ -6,7 +6,7 @@
 
 
 ```sh
- $ yarn global add he-reports-generator 
+ $ yarn global add hr-generator-report 
 ```
 ```sh
  $ npm install -g hr-generator-report
