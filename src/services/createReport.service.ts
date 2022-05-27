@@ -1,10 +1,10 @@
 import { addDays, format, eachDayOfInterval } from "date-fns";
 
+import ServiceContract from "../types/service.contract";
 import Constants from "../utils/constants";
 import createDayReportTemplate from "../utils/createDayReportTemplate";
 import createReportTitleTemplate from "../utils/createReportTitleTemplate";
 import parseRawToIso from "../utils/parseRawToIso";
-import ServiceContract from "./service.contract";
 
 type Answer = {
   start_raw_date: string;

@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 
+import CreateOneReportService from "./services/createOneReport.service";
 import CreateReportService from "./services/createReport.service";
 
 class ReportGenerator {
@@ -20,6 +21,16 @@ class ReportGenerator {
       .description("Generate new Report")
       .action(async () => {
         const reportService = CreateReportService.getInstance();
+
+        await reportService.handle();
+      });
+
+    this.shellCommander
+      .command("generate [name]")
+      .description("Generate one Report")
+      .alias("g")
+      .action(async () => {
+        const reportService = CreateOneReportService.getInstance();
 
         await reportService.handle();
       });

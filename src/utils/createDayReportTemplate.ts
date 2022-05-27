@@ -2,7 +2,7 @@ type Args = {
   date: string;
   startTime: string;
   endTime: string;
-  interval: number;
+  interval: number | string;
   description: string;
 };
 
