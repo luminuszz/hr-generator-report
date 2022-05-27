@@ -87,6 +87,12 @@ export default class CreateOneReportService extends ServiceContract {
     
     `;
 
+    const currentPath = await this.shellCommander.pwd();
+
+    const reportsPath = `${currentPath}/report.md`;
+
+    await this.shellCommander.touch(reportsPath);
+
     await this.shellCommander.exec(`echo "${report}" >> report.md`);
   }
 }

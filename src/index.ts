@@ -16,9 +16,9 @@ class ReportGenerator {
     this.shellCommander
       .version("0.0.1")
       .description("HR Report Generator")
-      .command("init [name]")
+      .command("init")
       .alias("i")
-      .description("Generate new Report")
+      .description("Generate a complete report week (7 days)")
       .action(async () => {
         const reportService = CreateReportService.getInstance();
 
@@ -26,8 +26,8 @@ class ReportGenerator {
       });
 
     this.shellCommander
-      .command("generate [name]")
-      .description("Generate one Report")
+      .command("generate")
+      .description("Generate one Report today")
       .alias("g")
       .action(async () => {
         const reportService = CreateOneReportService.getInstance();
