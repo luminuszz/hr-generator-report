@@ -1,4 +1,6 @@
+import * as crypto from "crypto";
 import { addDays, format, eachDayOfInterval } from "date-fns";
+import { ptBR } from "date-fns/locale";
 
 import ServiceContract from "../types/service.contract";
 import Constants from "../utils/constants";
@@ -65,13 +67,32 @@ class CreateReportService extends ServiceContract {
       end: endDate,
     });
 
+    const { validDates } = await this.shellInputs.prompt<{
+      validDates: Date[];
+    }>([
+      {
+        type: "checkbox",
+        name: "validDates",
+        message: "Selecione as datas:",
+        choices: intervalDates.map((date) => ({
+          checked: true,
+          value: date,
+          name: `${format(date, Constants.defaultDateFormat)} - ${format(
+            date,
+            "EEEE",
+            { locale: ptBR }
+          )}`,
+        })),
+      },
+    ]);
+
     const currentPath = await this.shellCommander.pwd();
 
     const reportPath = `${currentPath}/report.md`;
 
     await this.shellCommander.touch(reportPath);
 
-    const reportBody = intervalDates.map((currentInterval) =>
+    const reportBody = validDates.map((currentInterval) =>
       createDayReportTemplate({
         date: format(currentInterval, Constants.defaultDateFormat),
         startTime: response.start_time,
