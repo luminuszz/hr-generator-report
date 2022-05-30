@@ -27,7 +27,7 @@ export default class CreateOneReportService extends ServiceContract {
         type: "input",
         name: "start_raw_date",
         message: "Selecione a data inicial (dd/mm/yyyy):",
-        default: () => format(new Date(), Constants.defaultDateFormat),
+        default: () => format(today, Constants.defaultDateFormat),
       },
       {
         type: "input",
@@ -45,12 +45,12 @@ export default class CreateOneReportService extends ServiceContract {
         type: "input",
         name: "report_title",
         message: "Informe o motivo",
-        validate: (value) => {
-          if (value.length) {
+        validate: (value: string) => {
+          if (value.trim().length > 0) {
             return true;
           }
 
-          return "Informe o motivo";
+          return "O motivo é obrigatório";
         },
       },
     ]);
