@@ -1,6 +1,6 @@
 {
   "name": "hr-generator-report",
-  "version": "1.2.8",
+  "version": "1.2.10",
   "main": "src/index.ts",
   "author": "luminuszz",
   "license": "MIT",
@@ -9,8 +9,6 @@
     "build": "yarn babel src --extensions \".js,.ts\" --out-dir dist --copy-files",
     "push": "yarn publish",
     "prepush": "yarn build"
-
-
   },
   "bin": {
     "hr": "dist/index.js"
