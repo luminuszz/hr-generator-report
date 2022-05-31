@@ -22,5 +22,6 @@ module.exports = {
     "import/no-unresolved": "off",
     "no-nested-ternary": "off",
     "import/extensions": "off",
+    camelcase: "off",
   },
 };

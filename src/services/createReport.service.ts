@@ -1,18 +1,36 @@
-import * as crypto from "crypto";
-import { addDays, format, eachDayOfInterval } from "date-fns";
+import {
+  addDays,
+  addHours,
+  addMinutes,
+  eachDayOfInterval,
+  format,
+  formatDuration,
+  intervalToDuration,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
+import { resolve } from "node:path";
 
 import ServiceContract from "../types/service.contract";
 import Constants from "../utils/constants";
 import createDayReportTemplate from "../utils/createDayReportTemplate";
 import createReportTitleTemplate from "../utils/createReportTitleTemplate";
 import parseRawToIso from "../utils/parseRawToIso";
+import { splitTime } from "../utils/parseTime";
 
 type Answer = {
   start_raw_date: string;
   report_title: string;
   start_time: string;
   end_time: string;
+};
+type CreateReportResponse = {
+  report_path: string;
+  report_name: string;
+};
+
+type WriteReportArgs = {
+  path: string;
+  content: string;
 };
 
 const defaultPeriod: Pick<Answer, "start_time" | "end_time"> = {
@@ -21,12 +39,23 @@ const defaultPeriod: Pick<Answer, "start_time" | "end_time"> = {
 };
 
 class CreateReportService extends ServiceContract {
-  static getInstance(): CreateReportService {
+  public static getInstance(): CreateReportService {
     return new CreateReportService();
   }
 
-  private async makeQuestions(): Promise<Answer> {
-    return this.shellInputs.prompt([
+  private static formatDateTimeWeekDay(date: Date): string {
+    return format(date, "dd/MM/yyyy '-' EEEE", { locale: ptBR });
+  }
+
+  private static getIntervalDates(startDate: Date, endDate: Date): Date[] {
+    return eachDayOfInterval({
+      start: startDate,
+      end: endDate,
+    });
+  }
+
+  private async makeQuestionsForReportBody(): Promise<Answer> {
+    return this.shellInputs.prompt<Answer>([
       {
         type: "input",
         name: "start_raw_date",
@@ -53,20 +82,9 @@ class CreateReportService extends ServiceContract {
     ]);
   }
 
-  async handle(): Promise<void> {
-    const response = await this.makeQuestions();
-
-    const startDate = parseRawToIso(response.start_raw_date);
-    const endDate = addDays(
-      parseRawToIso(response.start_raw_date),
-      Constants.ONE_WEEK
-    );
-
-    const intervalDates = eachDayOfInterval({
-      start: startDate,
-      end: endDate,
-    });
-
+  private async makeQuestionForValidDatesForReportBody(
+    dates: Date[]
+  ): Promise<Date[]> {
     const { validDates } = await this.shellInputs.prompt<{
       validDates: Date[];
     }>([
@@ -74,31 +92,96 @@ class CreateReportService extends ServiceContract {
         type: "checkbox",
         name: "validDates",
         message: "Selecione as datas:",
-        choices: intervalDates.map((date) => ({
+        choices: dates.map((date) => ({
           checked: true,
           value: date,
-          name: `${format(date, Constants.defaultDateFormat)} - ${format(
-            date,
-            "EEEE",
-            { locale: ptBR }
-          )}`,
+          name: CreateReportService.formatDateTimeWeekDay(date),
         })),
       },
     ]);
 
-    const currentPath = await this.shellCommander.pwd();
+    return validDates;
+  }
 
-    const reportPath = `${currentPath}/report.md`;
+  private async createBlankReport(
+    directory?: string
+  ): Promise<CreateReportResponse> {
+    let reportDir;
 
-    await this.shellCommander.touch(reportPath);
+    if (directory) {
+      reportDir = resolve(directory);
+    } else {
+      reportDir = await this.shellCommander.pwd();
+    }
 
-    const reportBody = validDates.map((currentInterval) =>
+    const reportPath = resolve(reportDir.toString(), Constants.reportFileName);
+
+    await this.shellCommander.touch(reportPath, "report.md");
+
+    return {
+      report_name: Constants.reportFileName,
+      report_path: reportPath,
+    };
+  }
+
+  private async writeReport({ content, path }: WriteReportArgs): Promise<void> {
+    await this.shellCommander.exec(`echo "${content}" >> ${path}`);
+  }
+
+  private static getDuration(
+    currentDate: Date,
+    startTime: string,
+    endTime: string
+  ) {
+    const [startHour, startMinute] = splitTime(startTime);
+    const [endHour, endMinute] = splitTime(endTime);
+
+    const startDate = addMinutes(addHours(currentDate, startHour), startMinute);
+
+    const isNextDay = endHour < startHour;
+
+    const endDate = isNextDay
+      ? addDays(addMinutes(addHours(currentDate, endHour), endMinute), 1)
+      : addMinutes(addHours(currentDate, endHour), endMinute);
+
+    const duration = intervalToDuration({
+      start: startDate,
+      end: endDate,
+    });
+
+    return formatDuration(duration, {
+      locale: ptBR,
+      format: ["hours", "minutes"],
+    });
+  }
+
+  async handle(): Promise<void> {
+    const { end_time, start_time, report_title, start_raw_date } =
+      await this.makeQuestionsForReportBody();
+
+    const startDate = parseRawToIso(start_raw_date);
+    const endDate = addDays(parseRawToIso(start_raw_date), Constants.ONE_WEEK);
+
+    const intervalDateList = CreateReportService.getIntervalDates(
+      startDate,
+      endDate
+    );
+
+    const validDates = await this.makeQuestionForValidDatesForReportBody(
+      intervalDateList
+    );
+
+    const reportBody = validDates.map((currentDate) =>
       createDayReportTemplate({
-        date: format(currentInterval, Constants.defaultDateFormat),
-        startTime: response.start_time,
-        endTime: response.end_time,
-        description: response.report_title,
-        interval: 3,
+        date: format(currentDate, Constants.defaultDateFormat),
+        startTime: start_time,
+        endTime: end_time,
+        description: report_title,
+        interval: CreateReportService.getDuration(
+          currentDate,
+          start_time,
+          end_time
+        ),
       })
     );
 
@@ -107,11 +190,16 @@ class CreateReportService extends ServiceContract {
     ${reportBody.join("")}
     `;
 
-    await this.shellCommander.exec(`echo "${report}" >> report.md`);
+    const { report_path } = await this.createBlankReport();
+
+    await this.writeReport({
+      content: report,
+      path: report_path,
+    });
 
     await this.shellCommander.echo("Relatório gerado com sucesso!");
 
-    await this.shellCommander.echo(`Relatório salvo em ${reportPath}`);
+    await this.shellCommander.echo(`Relatório salvo em ${report_path}`);
   }
 }
 
