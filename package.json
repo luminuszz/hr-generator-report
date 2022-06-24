@@ -1,6 +1,6 @@
 {
   "name": "hr-generator-report",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "main": "src/index.ts",
   "author": "luminuszz",
   "license": "MIT",
