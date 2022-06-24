@@ -16,22 +16,7 @@ import createDayReportTemplate from "../utils/createDayReportTemplate";
 import createReportTitleTemplate from "../utils/createReportTitleTemplate";
 import parseRawToIso from "../utils/parseRawToIso";
 import { splitTime } from "../utils/parseTime";
-
-type Answer = {
-  start_raw_date: string;
-  report_title: string;
-  start_time: string;
-  end_time: string;
-};
-type CreateReportResponse = {
-  report_path: string;
-  report_name: string;
-};
-
-type WriteReportArgs = {
-  path: string;
-  content: string;
-};
+import type { Answer, WriteReportArgs, CreateReportResponse } from "./types";
 
 const defaultPeriod: Pick<Answer, "start_time" | "end_time"> = {
   start_time: "18:00",
@@ -198,7 +183,6 @@ class CreateReportService extends ServiceContract {
     });
 
     await this.shellCommander.echo("Relatório gerado com sucesso!");
-
     await this.shellCommander.echo(`Relatório salvo em ${report_path}`);
   }
 }

@@ -41,6 +41,5 @@ class ReportGenerator {
 
 (async () => {
   const reportGenerator = new ReportGenerator();
-
   await reportGenerator.run();
 })();
