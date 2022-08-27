@@ -1,9 +1,4 @@
-import {
-  addMinutes,
-  format,
-  formatDuration,
-  intervalToDuration,
-} from "date-fns";
+import { format, formatDuration, intervalToDuration } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Answer } from "../types/answer.type";
@@ -39,7 +34,7 @@ export default class CreateOneReportService extends ServiceContract {
         type: "input",
         name: "end_time",
         message: "Selecione o horário final (hh:mm):",
-        default: () => format(addMinutes(today, 30), "HH:mm"),
+        default: () => format(today, "HH:mm"),
       },
       {
         type: "input",
