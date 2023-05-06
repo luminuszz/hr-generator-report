@@ -14,7 +14,7 @@ import Constants from "../utils/constants";
 import createDayReportTemplate from "../utils/createDayReportTemplate";
 import createReportTitleTemplate from "../utils/createReportTitleTemplate";
 import parseRawToIso from "../utils/parseRawToIso";
-import parseTime, { splitTime } from "../utils/parseTime";
+import { splitTime } from "../utils/parseTime";
 
 export default class CreateOneReportService extends ServiceContract {
   static getInstance() {
@@ -90,11 +90,6 @@ export default class CreateOneReportService extends ServiceContract {
 
     const currentDate = parseRawToIso(response.start_raw_date);
 
-    const interval = intervalToDuration({
-      start: parseTime(response.start_time),
-      end: parseTime(response.end_time),
-    });
-
     const report = `
     ${createReportTitleTemplate(currentDate)}
     ${createDayReportTemplate({
@@ -120,6 +115,8 @@ export default class CreateOneReportService extends ServiceContract {
     await this.shellCommander.exec(`echo "${report}" >> report.md`);
 
     await this.shellCommander.echo("Relatório gerado com sucesso!");
+
+    await this.shellCommander.exec(`echo "${report}"`);
 
     await this.shellCommander.echo(`Relatório salvo em ${reportsPath}`);
   }
