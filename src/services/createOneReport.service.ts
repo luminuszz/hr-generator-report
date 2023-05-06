@@ -1,4 +1,11 @@
-import { format, formatDuration, intervalToDuration } from "date-fns";
+import {
+  addDays,
+  addHours,
+  addMinutes,
+  format,
+  formatDuration,
+  intervalToDuration,
+} from "date-fns";
 import { ptBR } from "date-fns/locale";
 
 import { Answer } from "../types/answer.type";
@@ -7,11 +14,38 @@ import Constants from "../utils/constants";
 import createDayReportTemplate from "../utils/createDayReportTemplate";
 import createReportTitleTemplate from "../utils/createReportTitleTemplate";
 import parseRawToIso from "../utils/parseRawToIso";
-import parseTime from "../utils/parseTime";
+import parseTime, { splitTime } from "../utils/parseTime";
 
 export default class CreateOneReportService extends ServiceContract {
   static getInstance() {
     return new CreateOneReportService();
+  }
+
+  private static getDuration(
+    currentDate: Date,
+    startTime: string,
+    endTime: string
+  ) {
+    const [startHour, startMinute] = splitTime(startTime);
+    const [endHour, endMinute] = splitTime(endTime);
+
+    const startDate = addMinutes(addHours(currentDate, startHour), startMinute);
+
+    const isNextDay = endHour < startHour;
+
+    const endDate = isNextDay
+      ? addDays(addMinutes(addHours(currentDate, endHour), endMinute), 1)
+      : addMinutes(addHours(currentDate, endHour), endMinute);
+
+    const duration = intervalToDuration({
+      start: startDate,
+      end: endDate,
+    });
+
+    return formatDuration(duration, {
+      locale: ptBR,
+      format: ["hours", "minutes"],
+    });
   }
 
   private async makeQuestions(): Promise<Answer> {
@@ -68,15 +102,10 @@ export default class CreateOneReportService extends ServiceContract {
       startTime: response.start_time,
       endTime: response.end_time,
       description: response.report_title,
-      interval: formatDuration(
-        {
-          minutes: interval.minutes,
-          hours: interval.hours,
-        },
-        {
-          locale: ptBR,
-          format: ["hours", "minutes"],
-        }
+      interval: CreateOneReportService.getDuration(
+        currentDate,
+        response.start_time,
+        response.end_time
       ),
     })}
     
